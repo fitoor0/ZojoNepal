@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turbo Top-Up — Instant Game Credits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--surface:#0d1220;--card:#121929;--border:#1a2540;--border2:#243050;
+  --accent:#f59e0b;--accent2:#6366f1;--accent3:#06b6d4;
+  --text:#e8edf8;--muted:#6b7fa8;--success:#10b981;--danger:#ef4444;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(7,9,15,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 5%}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#f59e0b,#f97316);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.nav-logo-text{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;letter-spacing:1px}
+.nav-logo-sub{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;line-height:1}
+.nav-links{display:flex;align-items:center;gap:24px}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-wallet{display:flex;align-items:center;gap:10px}
+.wallet-chip{background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:var(--success);padding:7px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.wallet-chip:hover{background:rgba(16,185,129,0.2)}
+.nav-cta{background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:filter .2s}
+.nav-cta:hover{filter:brightness(1.1)}
+.nav-hamburger{display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:5px}
+.nav-hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px}
+
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);padding:20px 5%;flex-direction:column;gap:16px;z-index:99}
+.mobile-menu.open{display:flex}
+.mobile-menu a{color:var(--muted);text-decoration:none;font-size:15px;font-weight:500}
+
+.auth-form-group { margin-bottom: 16px; text-align: left; }
+.auth-toggle-text { font-size: 13px; color: var(--muted); text-align: center; margin-top: 16px; cursor: pointer; }
+.auth-toggle-text span { color: var(--accent); font-weight: 600; }
+.auth-toggle-text span:hover { text-decoration: underline; }
+
+/* NEW GOOGLE BUTTON STYLES */
+.auth-divider { display: flex; align-items: center; text-align: center; color: var(--muted); font-size: 12px; margin: 16px 0; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
+.auth-divider:not(:empty)::before { margin-right: .5em; }
+.auth-divider:not(:empty)::after { margin-left: .5em; }
+.google-btn { width: 100%; background: #fff; color: #1f2937; border: none; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: background 0.2s; font-family: 'Inter', sans-serif; }
+.google-btn:hover { background: #f3f4f6; }
+.google-btn svg { width: 18px; height: 18px; }
+
+.hero{padding:140px 5% 80px;position:relative;overflow:hidden;text-align:center}
+.hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse at center,rgba(99,102,241,0.15) 0%,transparent 70%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--accent);font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:24px}
+.hero-eyebrow span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-family:'Rajdhani',sans-serif;font-size:clamp(44px,7vw,88px);font-weight:700;line-height:1;color:#fff;letter-spacing:-1px;margin-bottom:20px}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,#f59e0b,#f97316,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(15px,2vw,18px);color:var(--muted);max-width:520px;margin:0 auto 36px;line-height:1.7}
+.hero-btns{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:56px}
+.btn-primary{background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border:none;padding:14px 32px;border-radius:10px;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
+.btn-primary:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border2);padding:14px 28px;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
+.btn-ghost:hover{border-color:var(--muted)}
+
+.ticker{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0;overflow:hidden}
+.ticker-inner{display:flex;gap:48px;white-space:nowrap;animation:ticker 30s linear infinite}
+.ticker-item{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.ticker-item strong{color:var(--text)}
+.ticker-item .ok{color:var(--success);font-weight:600;font-size:12px}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:480px;overflow:hidden}
+.modal-header{background:var(--surface);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.modal-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff}
+.modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:0}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:24px}
+.modal-tabs{display:flex;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.modal-tab{flex:1;padding:10px;background:transparent;border:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.modal-tab.active{background:var(--accent2);color:#fff}
+
+.esewa-banner{background:linear-gradient(135deg,#1a2e1a,#0f1f0f);border:1px solid rgba(94,189,67,0.3);border-radius:12px;padding:20px;text-align:center;margin-bottom:20px}
+.esewa-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(94,189,67,0.15);border:1px solid rgba(94,189,67,0.4);color:#5ebd43;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.qr-wrap{background:#fff;border-radius:12px;padding:12px;display:inline-block;margin-bottom:14px}
+.qr-wrap img{width:160px;height:160px;display:block;border-radius:4px}
+.qr-name{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:2px}
+.qr-phone{font-size:13px;color:var(--muted)}
+.txn-input-wrap{margin-bottom:14px}
+.txn-label{font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.txn-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border .2s}
+.txn-input:focus{border-color:#5ebd43}
+.txn-input::placeholder{color:var(--muted)}
+.confirm-btn{width:100%;background:linear-gradient(135deg,#5ebd43,#3d9e26);border:none;padding:13px;border-radius:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .2s}
+.confirm-btn:hover{filter:brightness(1.08)}
+
+.txn-list{max-height:300px;overflow-y:auto}
+.txn-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.txn-row:last-child{border-bottom:none}
+.txn-info-title{font-size:13px;font-weight:600;color:var(--text)}
+.txn-info-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.txn-amt{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700}
+.txn-amt.credit{color:var(--success)}
+.txn-amt.debit{color:var(--danger)}
+.empty-txn{text-align:center;padding:32px;color:var(--muted);font-size:14px}
+
+.section{padding:80px 5%;max-width:1200px;margin:0 auto}
+.section-head{text-align:center;margin-bottom:48px}
+.section-title{font-family:'Rajdhani',sans-serif;font-size:clamp(28px,4vw,42px);font-weight:700;color:#fff;line-height:1.1}
+
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px}
+.game-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .25s ease;position:relative;display:flex;flex-direction:column}
+.game-card:hover{transform:translateY(-4px);border-color:var(--border2);box-shadow:0 12px 32px rgba(0,0,0,0.4)}
+.game-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.game-img-wrap{aspect-ratio:16/10;background:var(--surface);position:relative;overflow:hidden}
+.game-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.game-card:hover .game-img-wrap img{transform:scale(1.04)}
+.game-badge{position:absolute;top:12px;left:12px;background:rgba(7,9,15,0.75);backdrop-filter:blur(6px);border:1px solid var(--border);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;color:var(--accent)}
+.game-info{padding:18px;flex:1;display:flex;flex-direction:column;justify-content:space-between}
+.game-title{font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:4px}
+.game-pub{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+
+#topup{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.topup-wrap{padding:80px 5%;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 380px;gap:40px;align-items:start}
+.topup-step{display:flex;gap:16px;align-items:flex-start;margin-bottom:32px}
+.step-num{width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--accent);flex-shrink:0;margin-top:2px}
+.step-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:12px}
+.id-row{display:flex;gap:8px}
+.id-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:11px 16px;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border .2s}
+.id-input:focus{border-color:var(--accent)}
+.id-input::placeholder{color:var(--muted)}
+
+.pkg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.pkg-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;position:relative;text-align:left}
+.pkg-card:hover{border-color:var(--border2);background:rgba(18,25,41,0.6)}
+.pkg-card.active{border-color:var(--accent);background:rgba(245,158,11,0.04)}
+.pkg-hot{position:absolute;top:-9px;right:12px;background:linear-gradient(135deg,#ef4444,#f97316);color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px}
+.pkg-val{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#fff;line-height:1.2}
+.pkg-bonus{font-size:11px;color:var(--success);font-weight:600;margin-top:2px}
+.pkg-price{font-size:13px;color:var(--muted);margin-top:12px}
+
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;position:sticky;top:84px}
+.order-card-title{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:18px}
+.order-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13px;border-bottom:1px solid var(--border)}
+.order-row:last-of-type{border-bottom:none}
+.order-row .ol{color:var(--muted)}
+.order-row .ov{color:var(--text);font-weight:500}
+.order-total{display:flex;justify-content:space-between;align-items:center;padding:14px 0 0;margin-top:4px;border-top:1px solid var(--border2)}
+.order-total .ol{font-size:14px;font-weight:600;color:var(--text)}
+.order-total .ov{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;color:var(--accent)}
+.wallet-bal-row{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:10px;padding:12px 14px;margin:14px 0;display:flex;justify-content:space-between;align-items:center}
+.wbal-label{font-size:12px;color:var(--success)}
+.wbal-amt{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--success)}
+.buy-btn{width:100%;background:linear-gradient(135deg,#f59e0b,#f97316);border:none;padding:15px;border-radius:10px;color:#fff;font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s;margin-top:14px}
+.buy-btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+
+.faq-list{max-width:720px;margin:0 auto}
+.faq-item{border-bottom:1px solid var(--border);overflow:hidden}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:18px 0;cursor:pointer;font-size:15px;font-weight:500;color:var(--text);gap:12px}
+.faq-q:hover{color:var(--accent)}
+.faq-icon{font-size:20px;color:var(--muted);transition:transform .3s;flex-shrink:0}
+.faq-a{font-size:14px;color:var(--muted);line-height:1.7;max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:16px}
+.faq-item.open .faq-icon{transform:rotate(45deg);color:var(--accent)}
+
+footer{background:var(--surface);border-top:1px solid var(--border);padding:60px 5% 32px}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
+.footer-brand p{font-size:13px;color:var(--muted);margin-top:12px;max-width:280px;line-height:1.7}
+.footer-brand .socials{display:flex;gap:12px;margin-top:20px}
+.socials a{width:34px;height:34px;background:var(--card);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);text-decoration:none;font-size:14px;transition:all .2s}
+.socials a:hover{color:#fff;border-color:var(--border2)}
+.footer-links h4{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:16px;text-transform:uppercase;letter-spacing:.5px}
+.footer-links ul{list-style:none}
+.footer-links li{margin-bottom:10px}
+.footer-links a{color:var(--muted);text-decoration:none;font-size:13px;transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted)}
+
+.toast{position:fixed;bottom:24px;right:24px;background:#10b981;color:#fff;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;z-index:999;transform:translateY(80px);opacity:0;transition:all .35s;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{background:var(--danger)}
+
+@media(max-width:900px){
+  .topup-wrap{grid-template-columns:1fr}
+  .order-card{position:static}
+  .footer-top{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  nav .nav-links{display:none}
+  .nav-hamburger{display:flex}
+  .hero{padding:110px 5% 60px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">⚡</div>
+      <div>
+        <div class="nav-logo-text">TURBO TOP-UP</div>
+        <div class="nav-logo-sub">Instant Game Credits</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="#games">Games</a>
+      <a href="#topup">Top Up</a>
+      <a href="#faq">FAQ</a>
+      <div class="wallet-chip" onclick="openModal()" id="navWalletBlock" style="display:none;">💰 Wallet: <span id="navBalance">रू 0</span></div>
+      <button class="nav-cta" id="authNavBtn" onclick="openAuthModal()">Sign In</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#games" onclick="closeMenu()">Games</a>
+  <a href="#topup" onclick="closeMenu()">Top Up</a>
+  <a href="#faq" onclick="closeMenu()">FAQ</a>
+</div>
+
+<div class="modal-overlay" id="authModal" onclick="closeAuthModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="authModalTitle">⚡ Player Sign In</div>
+      <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <button class="google-btn" onclick="handleGoogleSignIn()">
+        <svg viewBox="0 0 24 24">
+          <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.866-3.577-7.866-8s3.536-8 7.866-8c2.46 0 4.105 1.025 5.047 1.926l3.258-3.133C18.344 1.156 15.562 0 12.24 0 5.52 0 0 5.37 0 12s5.52 12 12.24 12c7.012 0 11.677-4.89 11.677-11.88 0-.8-.086-1.41-.192-1.835H12.24z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="auth-divider">or use credentials</div>
+
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+        <div class="auth-form-group">
+          <div class="txn-label">Email Address</div>
+          <input type="email" id="authEmail" class="txn-input" placeholder="Enter your email" required />
+        </div>
+        <div class="auth-form-group">
+          <div class="txn-label">Password</div>
+          <input type="password" id="authPassword" class="txn-input" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="confirm-btn" id="authSubmitBtn" style="background: linear-gradient(135deg, var(--accent2), var(--accent3));">Sign In</button>
+        <p class="auth-toggle-text" id="authToggleMessage" onclick="toggleAuthMode()">
+          New Player? <span>Create an account</span>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="walletModal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💰 My Wallet</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Current Balance</div>
+        <div style="font-family:'Rajdhani',sans-serif;font-size:40px;font-weight:700;color:var(--success)" id="modalBalance">रू 0</div>
+      </div>
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="switchTab(this,'deposit')">Deposit via eSewa</button>
+        <button class="modal-tab" onclick="switchTab(this,'history')">Transaction History</button>
+      </div>
+
+      <div id="tabDeposit">
+        <div class="esewa-banner">
+          <div class="esewa-badge">🟢 eSewa Only</div>
+          <div class="qr-wrap">
+            <img src="https://i.postimg.cc/g073tvSz/Screenshot-2026-06-29-205831.png" alt="eSewa QR Code" style="width:160px;height:160px;display:block;margin:0 auto;border-radius:4px;">
+          </div>
+          <div class="qr-name">Turbo TopUp Gaming</div>
+          <div class="qr-phone">98XXXXXXXX</div>
+        </div>
+        <div class="txn-input-wrap">
+          <div class="txn-label">Transaction ID (16 Digits)</div>
+          <input type="text" id="txnIdInput" class="txn-input" placeholder="e.g. 52X8A9B..." maxlength="16" />
+        </div>
+        <button class="confirm-btn" onclick="submitDeposit()">Confirm Deposit</button>
+      </div>
+
+      <div id="tabHistory" style="display:none">
+        <div class="txn-list" id="txnHistoryList">
+          <div class="empty-txn">No transaction history found.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-eyebrow"><span></span>Direct Delivery Enabled</div>
+  <h1>Level Up Your Game With <em>Turbo Top-Up</em></h1>
+  <p class="hero-sub">Instant, safe, and automated game credit shop for regional players. Zero delays, maximum runtime security.</p>
+  <div class="hero-btns">
+    <a href="#games" class="btn-primary">Browse Catalog</a>
+    <a href="#faq" class="btn-ghost">How It Works</a>
+  </div>
+</section>
+
+<div class="ticker">
+  <div class="ticker-inner">
+    <div class="ticker-item">🔄 PUBG Mobile UC updated <span class="ok">● Online</span></div>
+    <div class="ticker-item">🔥 Free Fire Diamonds instant <span class="ok">● Online</span></div>
+    <div class="ticker-item">👑 Mobile Legends Diamonds <span class="ok">● Online</span></div>
+    <div class="ticker-item">⚡ Average delivery speed: <strong>42 seconds</strong></div>
+    <div class="ticker-item">🔄 PUBG Mobile UC updated <span class="ok">● Online</span></div>
+    <div class="ticker-item">🔥 Free Fire Diamonds instant <span class="ok">● Online</span></div>
+  </div>
+</div>
+
+<section class="section" id="games">
+  <div class="section-head">
+    <h2 class="section-title">Select Your Game</h2>
+  </div>
+  <div class="game-grid" id="gameGrid"></div>
+</section>
+
+<div id="topup">
+  <div class="topup-wrap">
+    <div>
+      <div class="topup-step">
+        <div class="step-num">1</div>
+        <div style="flex:1">
+          <div class="step-title">Player Account Credentials</div>
+          <div class="id-row">
+            <input type="text" class="id-input" id="playerIdField" placeholder="Enter Player ID / User Account ID" oninput="updateOrderCard()" />
+          </div>
+        </div>
+      </div>
+
+      <div class="topup-step">
+        <div class="step-num">2</div>
+        <div style="flex:1">
+          <div class="step-title">Select Package Deal</div>
+          <div class="pkg-grid" id="pkgGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="order-card">
+      <div class="order-card-title">Checkout Summary</div>
+      <div class="order-row">
+        <span class="ol">Selected Game</span>
+        <span class="ov" id="summaryGame">—</span>
+      </div>
+      <div class="order-row">
+        <span class="ol">Target ID</span>
+        <span class="ov" id="summaryId">—</span>
+      </div>
+      <div class="order-row">
+        <span class="ol">Credits Package</span>
+        <span class="ov" id="summaryPkg">—</span>
+      </div>
+      
+      <div class="wallet-bal-row">
+        <span class="wbal-label">Your Wallet Balance:</span>
+        <span class="wbal-amt" id="cardWalletBal">रू 0</span>
+      </div>
+
+      <div class="order-total">
+        <span class="ol">Total Cost</span>
+        <span class="ov" id="summaryTotal">रू 0</span>
+      </div>
+      <button class="buy-btn" onclick="executePurchase()">Purchase Package</button>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="faq">
+  <div class="section-head">
+    <h2 class="section-title">Frequently Answered</h2>
+  </div>
+  <div class="faq-list" id="faqList"></div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="nav-logo">
+          <div class="nav-logo-icon">⚡</div>
+          <div class="nav-logo-text">TURBO TOP-UP</div>
+        </a>
+        <p>Premium automation node providing safe and swift gaming item assets directly to regional player accounts.</p>
+        <div class="socials">
+          <a href="#">Fb</a><a href="#">Dc</a><a href="#">Vb</a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Products</h4>
+        <ul>
+          <li><a href="#games">PUBG Mobile</a></li>
+          <li><a href="#games">Free Fire</a></li>
+          <li><a href="#games">Mobile Legends</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#faq">Help FAQ Center</a></li>
+          <li><a href="#">Discord Server</a></li>
+          <li><a href="#">Viber Channel</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Refund Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Turbo Top-Up. All gaming rights preserved to matching properties.</div>
+      <div>Designed for swift execution mechanics.</div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">⚡ Operation Successful!</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// REPLACE WITH YOUR ACTUAL CODES FROM FIREBASE CONSOLE
+const firebaseConfig = {
+  apiKey: "AIzaSyDavVnTtTNoOfqZwP0KKiFK_GGjjz7bpI0",
+  authDomain: "turbo-topup-ef79f.firebaseapp.com",
+  projectId: "turbo-topup-ef79f",
+  storageBucket: "turbo-topup-ef79f.firebasestorage.app",
+  messagingSenderId: "90939874619",
+  appId: "1:90939874619:web:423c1b9ba143150d82ab1e",
+  measurementId: "G-5GQ9SR14P3"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+
+// Data Models
+const GAMES = [
+  { id: 'pubg', title: 'PUBG Mobile', pub: 'Tencent Games', img: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=500&q=80', tag: 'UC' },
+  { id: 'ff', title: 'Free Fire', pub: 'Garena', img: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=500&q=80', tag: 'Diamonds' },
+  { id: 'mlbb', title: 'Mobile Legends', pub: 'Moonton', img: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=500&q=80', tag: 'Diamonds' }
+];
+
+const PACKAGES = {
+  pubg: [
+    { id: 'p1', val: '60 UC', price: 120, hot: false },
+    { id: 'p2', val: '325 UC', price: 600, bonus: 'Bonus 25 UC', hot: true },
+    { id: 'p3', val: '660 UC', price: 1200, bonus: 'Bonus 60 UC', hot: false }
+  ],
+  ff: [
+    { id: 'f1', val: '100 Diamonds', price: 110, hot: false },
+    { id: 'f2', val: '210 Diamonds', price: 220, bonus: 'Bonus 21 Diamonds', hot: false },
+    { id: 'f3', val: '530 Diamonds', price: 530, bonus: 'Best Value Deal', hot: true }
+  ],
+  mlbb: [
+    { id: 'm1', val: '86 Diamonds', price: 160, hot: false },
+    { id: 'm2', val: '257 Diamonds', price: 470, hot: true }
+  ]
+};
+
+const FAQS = [
+  { q: 'How fast will I receive my game credits?', a: 'Credits are delivered within 60 seconds of a successful purchase.' },
+  { q: 'Is only eSewa accepted?', a: 'Yes, currently only eSewa storage wallet transfers are active.' },
+  { q: 'How do I find my Player ID?', a: 'Check inside your in-game profile system settings dashboard.' }
+];
+
+// App State Flags
+let selectedGame = 'pubg';
+let selectedPkg = null;
+let currentUser = null;
+let currentAuthMode = 'login';
+let currentWalletBalance = 0;
+
+window.toggleMenu = () => document.getElementById('mobileMenu').classList.toggle('open');
+window.closeMenu = () => document.getElementById('mobileMenu').classList.remove('open');
+
+const authModal = document.getElementById('authModal');
+const walletModal = document.getElementById('walletModal');
+const authModalTitle = document.getElementById('authModalTitle');
+const authSubmitBtn = document.getElementById('authSubmitBtn');
+const authToggleMessage = document.getElementById('authToggleMessage');
+const authNavBtn = document.getElementById('authNavBtn');
+const navWalletBlock = document.getElementById('navWalletBlock');
+
+window.openAuthModal = () => authModal.classList.add('open');
+window.closeAuthModal = () => authModal.classList.remove('open');
+window.closeAuthModalOutside = (e) => { if(e.target === authModal) closeAuthModal(); };
+window.openModal = () => { if(currentUser) walletModal.classList.add('open'); };
+window.closeModal = () => walletModal.classList.remove('open');
+window.closeModalOutside = (e) => { if(e.target === walletModal) closeModal(); };
+
+window.toggleAuthMode = () => {
+  if (currentAuthMode === 'login') {
+    currentAuthMode = 'signup';
+    authModalTitle.innerText = "⚡ Create Player Account";
+    authSubmitBtn.innerText = "Sign Up";
+    authToggleMessage.innerHTML = "Already have an account? <span>Sign In</span>";
+  } else {
+    currentAuthMode = 'login';
+    authModalTitle.innerText = "⚡ Player Sign In";
+    authSubmitBtn.innerText = "Sign In";
+    authToggleMessage.innerHTML = "New Player? <span>Create an account</span>";
+  }
+};
+
+function buildGameGrid() {
+  document.getElementById('gameGrid').innerHTML = GAMES.map(g => `
+    <div class="game-card ${g.id === selectedGame ? 'active' : ''}" onclick="selectGame('${g.id}')">
+      <div class="game-img-wrap">
+        <img src="${g.img}" alt="${g.title}">
+        <span class="game-badge">${g.tag}</span>
+      </div>
+      <div class="game-info">
+        <div>
+          <h3 class="game-title">${g.title}</h3>
+          <div class="game-pub">${g.pub}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.selectGame = (gameId) => {
+  selectedGame = gameId;
+  selectedPkg = null;
+  buildGameGrid();
+  renderPkgs();
+  updateOrderCard();
+};
+
+function renderPkgs() {
+  const pkgs = PACKAGES[selectedGame] || [];
+  document.getElementById('pkgGrid').innerHTML = pkgs.map(p => `
+    <div class="pkg-card ${selectedPkg && selectedPkg.id === p.id ? 'active' : ''}" onclick="selectPackage('${p.id}')">
+      ${p.hot ? `<div class="pkg-hot">Hot</div>` : ''}
+      <div class="pkg-val">${p.val}</div>
+      ${p.bonus ? `<div class="pkg-bonus">${p.bonus}</div>` : ''}
+      <div class="pkg-price">रू ${p.price}</div>
+    </div>
+  `).join('');
+}
+
+window.selectPackage = (pkgId) => {
+  const pkgs = PACKAGES[selectedGame] || [];
+  selectedPkg = pkgs.find(p => p.id === pkgId);
+  renderPkgs();
+  updateOrderCard();
+};
+
+window.updateOrderCard = () => {
+  const game = GAMES.find(g => g.id === selectedGame);
+  const idVal = document.getElementById('playerIdField').value.trim();
+  
+  document.getElementById('summaryGame').innerText = game ? game.title : '—';
+  document.getElementById('summaryId').innerText = idVal ? idVal : '—';
+  document.getElementById('summaryPkg').innerText = selectedPkg ? selectedPkg.val : '—';
+  document.getElementById('summaryTotal').innerText = selectedPkg ? `रू ${selectedPkg.price}` : 'रू 0';
+};
+
+// Email/Password Authentication
+window.handleAuthSubmit = async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value;
+  const password = document.getElementById('authPassword').value;
+
+  try {
+    if (currentAuthMode === 'login') {
+      await signInWithEmailAndPassword(auth, email, password);
+      showToast("Signed in successfully!");
+    } else {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, "users", cred.user.uid), {
+        email: email,
+        balance: 0,
+        transactions: []
+      });
+      showToast("Account built successfully!");
+    }
+    closeAuthModal();
+  } catch (err) {
+    showToast(err.message, true);
+  }
+};
+
+// NEW GOOGLE SIGN IN OAUTH HANDLER
+window.handleGoogleSignIn = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    
+    // Check if user record already exists inside Firestore
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+    
+    // If it's a new user logging in via Google for the first time, establish their document properties
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        email: user.email,
+        balance: 0,
+        transactions: []
+      });
+    }
+    
+    showToast("Signed in with Google!");
+    closeAuthModal();
+  } catch (err) {
+    showToast(err.message, true);
+  }
+};
+
+// Monitor User State Change
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    authNavBtn.innerText = "Log Out";
+    authNavBtn.onclick = () => signOut(auth);
+    navWalletBlock.style.display = "flex";
+    
+    onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        currentWalletBalance = data.balance || 0;
+        updateWalletUI(data.balance, data.transactions);
+      }
+    });
+  } else {
+    currentUser = null;
+    currentWalletBalance = 0;
+    authNavBtn.innerText = "Sign In";
+    authNavBtn.onclick = () => openAuthModal();
+    navWalletBlock.style.display = "none";
+    updateWalletUI(0, []);
+  }
+});
+
+function updateWalletUI(balance, transactions) {
+  document.getElementById('navBalance').innerText = `रू ${balance}`;
+  document.getElementById('modalBalance').innerText = `रू ${balance}`;
+  document.getElementById('cardWalletBal').innerText = `रू ${balance}`;
+  
+  const historyList = document.getElementById('txnHistoryList');
+  if (!transactions || transactions.length === 0) {
+    historyList.innerHTML = '<div class="empty-txn">No transaction history found.</div>';
+    return;
+  }
+  
+  historyList.innerHTML = transactions.map(t => `
+    <div class="txn-row">
+      <div>
+        <div class="txn-info-title">${t.type === 'deposit' ? '💰 Wallet Deposit' : '⚡ Top-Up Purchase'}</div>
+        <div class="txn-info-sub">${t.id || ''} • ${t.date}</div>
+      </div>
+      <div class="txn-amt ${t.type === 'deposit' ? 'credit' : 'debit'}">
+        ${t.type === 'deposit' ? '+' : '-'} रू ${t.amount}
+      </div>
+    </div>
+  `).join('');
+}
+
+window.submitDeposit = async () => {
+  if(!currentUser) return;
+  const txnId = document.getElementById('txnIdInput').value.trim();
+  if (txnId.length < 8) {
+    showToast("Please enter a valid Transaction ID", true);
+    return;
+  }
+  
+  try {
+    const userRef = doc(db, "users", currentUser.uid);
+    const addedAmt = 500;
+    
+    await updateDoc(userRef, {
+      balance: currentWalletBalance + addedAmt,
+      transactions: arrayUnion({
+        id: txnId,
+        type: 'deposit',
+        amount: addedAmt,
+        date: new Date().toLocaleDateString()
+      })
+    });
+    
+    showToast(`Deposited रू ${addedAmt} via eSewa!`);
+    document.getElementById('txnIdInput').value = "";
+  } catch (err) {
+    showToast("Transaction filing failed.", true);
+  }
+};
+
+window.executePurchase = async () => {
+  if (!currentUser) {
+    showToast("Please Sign In to purchase credits!", true);
+    openAuthModal();
+    return;
+  }
+  
+  const idVal = document.getElementById('playerIdField').value.trim();
+  if (!idVal) {
+    showToast("Please supply a valid Target Player ID", true);
+    return;
+  }
+  
+  if (!selectedPkg) {
+    showToast("Please choose an available Top-Up package bundle", true);
+    return;
+  }
+  
+  if (currentWalletBalance < selectedPkg.price) {
+    showToast("Insufficient funds! Scan QR code to top up balance.", true);
+    openModal();
+    return;
+  }
+  
+  try {
+    const userRef = doc(db, "users", currentUser.uid);
+    const orderCost = selectedPkg.price;
+    
+    await updateDoc(userRef, {
+      balance: currentWalletBalance - orderCost,
+      transactions: arrayUnion({
+        id: `TOPUP-${Math.floor(100000 + Math.random() * 900000)}`,
+        type: 'purchase',
+        amount: orderCost,
+        date: new Date().toLocaleDateString()
+      })
+    });
+    
+    showToast("Purchase success! Credits queued for injection.");
+    document.getElementById('playerIdField').value = "";
+    selectedPkg = null;
+    renderPkgs();
+    updateOrderCard();
+  } catch (e) {
+    showToast("Database transfer error occurred.", true);
+  }
+};
+
+window.switchTab = (btn, tab) => {
+  document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tabDeposit').style.display = tab === 'deposit' ? 'block' : 'none';
+  document.getElementById('tabHistory').style.display = tab === 'history' ? 'block' : 'none';
+};
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.innerText = msg;
+  if(isError) t.classList.add('error'); else t.classList.remove('error');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+document.getElementById('faqList').innerHTML = FAQS.map((f,i) => `
+  <div class="faq-item" id="faq-${i}">
+    <div class="faq-q" onclick="document.getElementById('faq-${i}').classList.toggle('open')">${f.q}<span class="faq-icon">+</span></div>
+    <div class="faq-a">${f.a}</div>
+  </div>`).join('');
+
+buildGameGrid();
+renderPkgs();
+updateOrderCard();
+</script>
+</body>
+</html>
